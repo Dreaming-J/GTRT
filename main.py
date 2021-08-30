@@ -28,22 +28,20 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-global_txt = "실행중..."
-global_flag = threading.Event()
-
 def resource_path(relative_path): # pyinstaller 실행 시 참고자료 경로 지정 함수
     try:
         base_path = sys._MEIPASS
     except Exception:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
+global_txt = ""
+global_flag = threading.Event()
 
 def thread_translate():
     global global_txt
     while not global_flag.is_set():
         img = imgage_extraction()
         global_txt = img2txt(img)
-
 def imgage_extraction(): # 특정 화면 캡쳐 후 글자만 남기는 필터 적용
     imgGrab = ImageGrab.grab(bbox=(420, 890, 1510, 1050))
     image = cv2.cvtColor(np.array(imgGrab), cv2.COLOR_RGB2BGR)
@@ -70,8 +68,16 @@ def img2txt(mark): # mark에서 텍스트 추출 후 번역
     try:
         translation = translator.translate(text, dest='ko')
         text = translation.text
+        text = translation_pokemon(text)
     except:
         text = ""
+    return text
+def translation_pokemon(text):
+    a = "Gulpin"
+    b = "꿀꺽몬"
+    if a in text:
+        text = text.replace("%s"%a, "%s"%b)
+        print(text)
     return text
 
 class MainWindow(QWidget):
