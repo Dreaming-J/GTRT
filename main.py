@@ -2,9 +2,11 @@
 # pip install googletrans==4.0.0-rc1
 # pip install pytesseract
 # pip install pyqt5
+# pip install pandas
+# pip install openpyxl
 # pip install pyinstaller
 
-# pyinstaller -w --add-data ./icon.ico;. -F -i ./icon.ico main.py
+# pyinstaller -w --add-data ./References/*;. -F -i ./References/torchic.ico main.py
 
 # 투명하게 (below 3 lines)
 # self.setStyleSheet("background:transparent")
@@ -14,7 +16,6 @@
 # cv2.imwrite('filter_rgb.png', mark) #필터 사진 저장
 
 #파란색 글씨 살리기 구현 못함
-#포켓몬 이름 자동 번역
 
 import os
 import sys
@@ -22,6 +23,7 @@ import threading
 import cv2
 import googletrans
 import pytesseract
+import pandas as pd
 import numpy as np
 from PIL import ImageGrab
 from PyQt5.QtWidgets import *
@@ -73,11 +75,11 @@ def img2txt(mark): # mark에서 텍스트 추출 후 번역
         text = ""
     return text
 def translation_pokemon(text):
-    a = "Gulpin"
-    b = "꿀꺽몬"
-    if a in text:
-        text = text.replace("%s"%a, "%s"%b)
-        print(text)
+    pokedex_eng = pokedex[0]
+    pokedex_kor = pokedex[1]
+    for i, v in enumerate(pokedex_eng):
+        if v in text:
+            text = text.replace("%s"%v, "%s"%pokedex_kor[i])
     return text
 
 class MainWindow(QWidget):
@@ -110,6 +112,9 @@ class MainWindow(QWidget):
         font.setBold(True)
         font.setFamily('맑은 고딕')
         self.label.setFont(font)
+        pixmap = QPixmap(resource_path('./References/DX.jpg'))
+        self.label.setPixmap(pixmap)
+        self.label.resize(pixmap.width(), pixmap.height())
 
         layout = QGridLayout()
         layout.addWidget(self.button1, 0, 0)
@@ -185,6 +190,8 @@ class MainWindow(QWidget):
         self.dialog.close()
 
 if __name__ == '__main__':
+    pokedex = pd.read_excel(resource_path('./References/pokedex.xlsx'), header=None, index_col=None, names=None)
+    translation_pokemon("A")
     app = QApplication(sys.argv)
     start = MainWindow()
     sys.exit(app.exec_())
